@@ -21,13 +21,7 @@ func NewCtrl(repo *repository) *controller {
 func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
-	response, err := c.repo.FindAll()
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
+	result := c.service.
 }
 
 func (c *controller) History(w http.ResponseWriter, r *http.Request) {
