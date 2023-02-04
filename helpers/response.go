@@ -6,10 +6,18 @@ import (
 )
 
 type Response struct {
+    Meta Meta `json:"meta"`
+    Data 
+}
+
+type Meta struct{
     Status      string      `json:"status"`
     IsError     bool        `json:"isError"`
-    Data        interface{} `json:"data,omitempty"`
-    Description interface{} `json:"description,omitempty"`
+    Message interface{} `json:"description,omitempty"`
+}
+
+type Data struct{
+    Data interface{} `json:"data,omitempty"`
 }
 
 func (res Response) Send(w http.ResponseWriter) {
@@ -19,18 +27,15 @@ func (res Response) Send(w http.ResponseWriter) {
     }
 }
 
-func New(data interface{}, code int, isError bool) *Response {
-    if isError {
-        return &Response{
-            Status:     getStatus(code),
-            IsError:     isError,
-            Description: data,
-        }
-    }
+func New(code int, message interface{},data ...interface{}) *Response {
     return &Response{
-        Status: getStatus(code),
-        IsError: isError,
-        Data: data,
+        Meta{
+            Status: getStatus(code),
+            Message: message,
+        },
+        Data{
+            Data: data,
+        },
     }
 }
 

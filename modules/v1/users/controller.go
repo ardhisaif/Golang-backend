@@ -22,10 +22,11 @@ func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	response, err := c.repo.FindAll()
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
 }
 
 func (c *controller) Register(w http.ResponseWriter, r *http.Request) {
@@ -36,13 +37,19 @@ func (c *controller) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-
-	response, err := c.repo.Register(&data)
+	hash, err := helpers.HashPass(data.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+	data.Password = hash
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	response, err := c.repo.Register(&data)
+	if err != nil {
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
+	}
+
+	helpers.New(http.StatusOK, "User successfully registered!", response).Send(w)
 }
 
 func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
@@ -52,17 +59,17 @@ func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
 	var data model.User
 	err := json.NewDecoder(r.Body).Decode(&data) // implement req json
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
 	response, err := c.repo.Update(&data, id)
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully updated!", response).Send(w)
 }
 
 func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
@@ -72,9 +79,9 @@ func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
 	var data model.User
 	_, err := c.repo.Delete(&data, id)
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	helpers.New("delete successfully", http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully deleted!", id).Send(w)
 }

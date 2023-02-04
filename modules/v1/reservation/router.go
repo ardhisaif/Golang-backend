@@ -17,5 +17,7 @@ func New(rt *mux.Router, db *gorm.DB) {
 
 	router.HandleFunc("/payment/{id}", ctrl.Payment).Methods("PUT")
 	router.HandleFunc("/history", ctrl.History).Methods("GET")
+	// router.HandleFunc("/history/search/", ctrl.Search).Queries("name", "{name}").Methods("GET")
+	router.HandleFunc("/sort/", ctrl.Sort).Queries("name", "{name}").Methods("GET")
 	
 }

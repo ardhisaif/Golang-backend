@@ -22,10 +22,11 @@ func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	response, err := c.repo.FindAll()
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
 }
 
 func (c *controller) Popular(w http.ResponseWriter, r *http.Request) {
@@ -33,10 +34,11 @@ func (c *controller) Popular(w http.ResponseWriter, r *http.Request) {
 
 	response, err := c.repo.Popular()
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
 }
 
 func (c *controller) Search(w http.ResponseWriter, r *http.Request) {
@@ -45,10 +47,11 @@ func (c *controller) Search(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	response, err := c.repo.Search(name)
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
 }
 
 func (c *controller) Sort(w http.ResponseWriter, r *http.Request) {
@@ -57,10 +60,11 @@ func (c *controller) Sort(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	response, err := c.repo.Sort(name)
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
 }
 
 func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
@@ -69,15 +73,17 @@ func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	var data model.Vehicle
 	err := json.NewDecoder(r.Body).Decode(&data) // implement req json
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
 	response, err := c.repo.Create(&data)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully created!", response).Send(w)
 }
 
 func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
@@ -87,17 +93,17 @@ func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
 	var data model.Vehicle
 	err := json.NewDecoder(r.Body).Decode(&data) // implement req json
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
 	response, err := c.repo.Update(&data, id)
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	helpers.New(response, http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data successfully updated!", response).Send(w)
 }
 
 func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
@@ -107,9 +113,9 @@ func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
 	var data model.Vehicle
 	_, err := c.repo.Delete(&data, id)
 	if err != nil {
-		helpers.New(err.Error(), http.StatusBadRequest, true).Send(w)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	helpers.New("delete successfully", http.StatusOK, false).Send(w)
+	helpers.New(http.StatusOK, "Data Successfully deleted!", id).Send(w)
 }

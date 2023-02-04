@@ -33,6 +33,27 @@ func (r *repository) History() (*model.Reservations, error) {
 	return &reservation, nil
 }
 
+func (r *repository) Search(name string) (*model.Reservations, error) {
+	var reservation model.Reservations
+	data := r.db.Where("vehicle.name like ?", "%"+name+"%").Limit(3).Find(&reservation)
+	if data.Error != nil {
+		return nil, data.Error
+	}
+
+	return &reservation, nil
+}
+
+func (r *repository) Sort(name string) (*model.Reservations, error) {
+	var reservation model.Reservations
+	data := r.db.Where("is_booked = true").Order(name).Find(&reservation)
+	
+	if data.Error != nil {
+		return nil, data.Error
+	}
+
+	return &reservation, nil
+}
+
 func (r *repository) Create(reservation *model.Reservation) (*model.Reservation, error) {
 	data := r.db.Create(&reservation)
 	if data.Error != nil {

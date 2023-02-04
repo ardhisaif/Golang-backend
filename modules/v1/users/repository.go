@@ -32,6 +32,8 @@ func (r *repository) Register(user *model.User) (*model.User, error) {
 		return nil, data.Error
 	}
 
+	user.Password = ""
+
 	return user, nil
 }
 
