@@ -2,8 +2,6 @@ package helpers
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 
 	"github.com/cloudinary/cloudinary-go/v2"
@@ -11,7 +9,7 @@ import (
 	uuid "github.com/google/uuid"
 )
 
-func CloudUpload(src string) (string, error) {
+func CloudUpload(src interface{}) (string, error) {
 	cloud := os.Getenv("CLOUD_NAME")
 	key := os.Getenv("CLOUD_KEY")
 	secret := os.Getenv("CLOUD_SECRET")
@@ -23,11 +21,10 @@ func CloudUpload(src string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(src)
 
 	res, err := cld.Upload.Upload(ctx, src, uploader.UploadParams{
-		PublicID: imageID.String(), 
-		Folder: "vehicle",
+		PublicID: imageID.String(),
+		Folder:   "vehicle",
 	})
 	if err != nil {
 		return "", err
@@ -39,12 +36,6 @@ func CloudUpload(src string) (string, error) {
 	}
 
 	image.Transformation = "c_fill,h_150,w_100"
-
-	if err := os.Remove(src); err != nil {
-		log.Println(err.Error())
-	}
-
-	fmt.Println(res, "response")
 
 	return res.SecureURL, nil
 }

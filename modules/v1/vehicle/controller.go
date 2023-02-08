@@ -2,12 +2,7 @@ package vehicle
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
-	"time"
 
 	"github.com/ardhisaif/golang_backend/database/orm/model"
 	"github.com/ardhisaif/golang_backend/helpers"
@@ -50,87 +45,36 @@ func (c *controller) Sort(w http.ResponseWriter, r *http.Request) {
 	c.service.Sort(name).Send(w)
 }
 
-func UploadImage(w http.ResponseWriter, r *http.Request) string {
-	file, handler, err := r.FormFile("image")
-	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
-		helpers.New(http.StatusInternalServerError, err.Error()).Send(w)
-		return ""
-	}
-	fmt.Println(file)
-	err = r.ParseForm()
-	if err != nil {
-		helpers.New(http.StatusInternalServerError, err.Error()).Send(w)
-		return ""
-	}
-
-	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-	// fmt.Printf("File Size: %+v\n", handler.Size)
-	// fmt.Printf("MIME Header: %+v\n", handler.Header)
-
-	err = os.MkdirAll("./public", os.ModePerm)
-	if err != nil {
-		helpers.New(http.StatusInternalServerError, err.Error()).Send(w)
-		return ""
-	}
-
-	imageName := fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(handler.Filename))
-
-	pathFile := filepath.Join("./public/" + imageName)
-
-	dst, err := os.Create(pathFile)
-	if err != nil {
-		helpers.New(http.StatusInternalServerError, err.Error()).Send(w)
-		return ""
-	}
-	defer dst.Close()
-
-	return imageName
-}
-
 func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
 	var decoder = schema.NewDecoder()
 	var data model.Vehicle
-	// imageName:= UploadImage(w, r)
 	err := r.ParseForm()
 	if err != nil {
 		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	file, handler, err := r.FormFile("image")
-	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-
-	filename := handler.Filename
-	fileLocation := filepath.Join("./public/", filename)
-	targetFile, err := os.OpenFile(fileLocation, os.O_WRONLY|os.O_CREATE, 0666)
+	file, _, err := r.FormFile("image")
 	if err != nil {
 		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
-	defer targetFile.Close()
 
-	if _, err := io.Copy(targetFile, file); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	fileUrl, err := helpers.CloudUpload(file)
+	if err != nil {
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
+	defer file.Close()
 
 	err = decoder.Decode(&data, r.PostForm)
 	if err != nil {
 		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
-	fmt.Println(fileLocation)
-	
-	data.Image = fileLocation
+	data.Image = fileUrl
 	c.service.Create(&data).Send(w)
 }
 

@@ -1,7 +1,6 @@
 package vehicle
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/ardhisaif/golang_backend/database/orm/model"
@@ -54,19 +53,10 @@ func (c *service) Sort(name string) *helpers.Response {
 }
 
 func (c *service) Create(data *model.Vehicle) *helpers.Response {
-	fileUrl, err := helpers.CloudUpload(data.Image)
+	data, err := c.repo.Create(data)
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 	}
-
-	data.Image = fileUrl
-	fmt.Println(data)
-	data, err = c.repo.Create(data)
-	if err != nil {
-		return helpers.New(http.StatusBadRequest, err.Error())
-	}
-	fmt.Println(data)
-
 	return helpers.New(http.StatusOK, "Vehicle successfully created!", data)
 }
 
