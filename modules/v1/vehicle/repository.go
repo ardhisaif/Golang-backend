@@ -54,7 +54,7 @@ func (r *repository) Sort(name string) (*model.Vehicles, error) {
 }
 
 func (r *repository) Create(vehicle *model.Vehicle) (*model.Vehicle, error) {
-	data := r.db.Create(&vehicle)
+	data := r.db.Create(vehicle)
 	if data.Error != nil {
 		return nil, data.Error
 	}

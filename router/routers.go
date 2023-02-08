@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ardhisaif/golang_backend/database/orm"
+	"github.com/ardhisaif/golang_backend/modules/v1/auth"
 	"github.com/ardhisaif/golang_backend/modules/v1/reservation"
 	"github.com/ardhisaif/golang_backend/modules/v1/users"
 	"github.com/ardhisaif/golang_backend/modules/v1/vehicle"
@@ -18,6 +19,7 @@ func NewApp() (*mux.Router, error) {
 		return nil, err
 	}
 
+	auth.New(r, db)
 	users.New(r, db)
 	vehicle.New(r, db)
 	reservation.New(r, db)

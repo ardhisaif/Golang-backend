@@ -6,27 +6,24 @@ import (
 
 	"github.com/ardhisaif/golang_backend/database/orm/model"
 	"github.com/ardhisaif/golang_backend/helpers"
+	"github.com/ardhisaif/golang_backend/interfaces"
+	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/mux"
 )
 
 type controller struct {
-	repo *repository
+	service interfaces.UserSvcIF
 }
 
-func NewCtrl(repo *repository) *controller {
-	return &controller{repo}
+func NewCtrl(service interfaces.UserSvcIF) *controller {
+	return &controller{service}
 }
 
 func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
-
-	response, err := c.repo.FindAll()
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
+	
+	var data model.User
+	c.service.FindAll(&data).Send(w)
 }
 
 func (c *controller) Register(w http.ResponseWriter, r *http.Request) {
@@ -35,21 +32,18 @@ func (c *controller) Register(w http.ResponseWriter, r *http.Request) {
 	var data model.User
 	err := json.NewDecoder(r.Body).Decode(&data) // implement req json
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
+		return
 	}
-	hash, err := helpers.HashPass(data.Password)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-	data.Password = hash
 
-	response, err := c.repo.Register(&data)
+	_, err = govalidator.ValidateStruct(&data)
 	if err != nil {
 		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	helpers.New(http.StatusOK, "User successfully registered!", response).Send(w)
+	c.service.Register(&data).Send(w)
+	
 }
 
 func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
@@ -63,13 +57,13 @@ func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := c.repo.Update(&data, id)
+	_, err = govalidator.ValidateStruct(&data)
 	if err != nil {
 		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 
-	helpers.New(http.StatusOK, "Data successfully updated!", response).Send(w)
+	c.service.Update(&data, id).Send(w)
 }
 
 func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
@@ -77,11 +71,6 @@ func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
 
 	id := mux.Vars(r)["id"]
 	var data model.User
-	_, err := c.repo.Delete(&data, id)
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
 
-	helpers.New(http.StatusOK, "Data successfully deleted!", id).Send(w)
+	c.service.Update(&data, id).Send(w)
 }

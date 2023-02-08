@@ -8,7 +8,8 @@ import (
 func New(rt *mux.Router, db *gorm.DB) {
 	router := rt.PathPrefix("/reservation").Subrouter()
 	repo := NewRepo(db)
-	ctrl := NewCtrl(repo)
+	svc := NewService(repo)
+	ctrl := NewCtrl(svc)
 
 	router.HandleFunc("/", ctrl.GetAll).Methods("GET")
 	router.HandleFunc("/", ctrl.Create).Methods("POST")

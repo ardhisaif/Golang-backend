@@ -54,3 +54,30 @@ go run main.go
 - contoh: App gojek memiliki beberapa service atau applikasi serperti GoRide, GoPay, GoFood
 
 
+<br />
+<br />
+<br />
+<br />
+
+# Dependency Injection
+- teknik untuk mengatur dua objek yang saling berhubungan
+- proses pemisahan berdasarkan fungsi masing-masing
+
+# Sessions, Cookies, Tokens
+### Session
+- semua interaksi yang dilakukan user dalam jangka waktu tertentu
+- di record melalui session id
+- untuk menyimpan data disisi server
+
+### Cookies
+- file kecil yang menyimpan kumpulan session
+
+### Token
+- menyimpan dan mentransfer data sesnsitif dengan lebih aman(dicompile dalam bentuk signature JWT)
+- memiliki header, jenis algoritma, payload
+
+# DB Pooling
+metode yang digunakan untuk menjaga koneksi database tetap terbuka sehingga dapat digunakan kembali oleh orang lain.
+- Mempercepat response time
+- Penggunaan kembali resource database
+- Penggunaan memory lebih hemat

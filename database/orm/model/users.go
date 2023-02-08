@@ -1,15 +1,19 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	uuid "github.com/jackc/pgtype/ext/gofrs-uuid"
+)
 
 type User struct {
-	UserID    uint      `gorm:"primaryKey" json:"id,omitempty"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password,omitempty"`
-	Role 		string	`json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UserID    uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"id,omitempty" valid:"-"`
+	Name      string    `gorm:"unique;not null" json:"name" valid:"type(string)"`
+	Email     string    `gorm:"unique;not null" json:"email" valid:"email,optional"`
+	Password  string    `json:"password,omitempty" valid:"type(string)"`
+	Role      string    `json:"role" valid:"type(string)"`
+	CreatedAt time.Time `json:"created_at" valid:"-"`
+	UpdatedAt time.Time `json:"updated_at" valid:"-"`
 }
 
 type Users []User

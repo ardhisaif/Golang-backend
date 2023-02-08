@@ -2,20 +2,19 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
-	"github.com/ardhisaif/golang_backend/router"
+	"github.com/ardhisaif/golang_backend/command"
+	"github.com/asaskevich/govalidator"
+	_ "github.com/joho/godotenv/autoload"
 )
 
-func main() {
-	r, err := router.NewApp()
-	if err != nil {
-		log.Fatal(err)
-	}
+func init() {
+	govalidator.SetFieldsRequiredByDefault(true)
+}
 
-	log.Println("app run on port 3001")
-	err = http.ListenAndServe(":3001", r)
-	if err != nil {
+func main() {
+	if err := command.Run(os.Args[1:]); err != nil {
 		log.Fatal(err)
 	}
 }

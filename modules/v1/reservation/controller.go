@@ -2,7 +2,6 @@ package reservation
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/ardhisaif/golang_backend/database/orm/model"
@@ -11,62 +10,44 @@ import (
 )
 
 type controller struct {
-	repo *repository
+	service *service
 }
 
-func NewCtrl(repo *repository) *controller {
+func NewCtrl(repo *service) *controller {
 	return &controller{repo}
 }
 
 func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
-	result := c.service.
+	response := c.service.GetAll()
+	response.Send(w)
 }
 
 func (c *controller) History(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
-	response, err := c.repo.History()
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
+	response := c.service.History()
+	response.Send(w)
 }
 
 func (c *controller) Search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
 	name := r.FormValue("name")
-	response, err := c.repo.Search(name)
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
+	response := c.service.Search(name)
+	response.Send(w)
 }
 
 func (c *controller) Sort(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
 	name := r.FormValue("name")
-	fmt.Println(name)
-	fmt.Println("ma...........")
-	response, err := c.repo.Sort(name)
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response).Send(w)
+	c.service.Sort(name).Send(w)
 }
 
 func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
-
 	var data model.Reservation
 	err := json.NewDecoder(r.Body).Decode(&data) // implement req json
 	if err != nil {
@@ -74,13 +55,7 @@ func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := c.repo.Create(&data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully created!", response).Send(w)
+	c.service.Create(&data).Send(w)
 }
 
 func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
@@ -94,13 +69,8 @@ func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := c.repo.Update(&data, id)
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data successfully updated!", response).Send(w)
+	response := c.service.Update(&data, id)
+	response.Send(w)
 }
 
 func (c *controller) Payment(w http.ResponseWriter, r *http.Request) {
@@ -110,13 +80,8 @@ func (c *controller) Payment(w http.ResponseWriter, r *http.Request) {
 	var reservation model.Reservation
 	var vehicle model.Vehicle
 
-	_ , err := c.repo.Pay(&reservation, &vehicle, id)
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Payment success").Send(w)
+	response := c.service.Pay(&reservation, &vehicle, id)
+	response.Send(w)
 }
 
 func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
@@ -124,11 +89,6 @@ func (c *controller) Delete(w http.ResponseWriter, r *http.Request) {
 
 	id := mux.Vars(r)["id"]
 	var data model.Reservation
-	_, err := c.repo.Delete(&data, id)
-	if err != nil {
-		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
-		return
-	}
-
-	helpers.New(http.StatusOK, "Data succesfulfully deleted!").Send(w)
+	response := c.service.Delete(&data, id)
+	response.Send(w)
 }

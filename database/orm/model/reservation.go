@@ -1,11 +1,15 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	uuid "github.com/jackc/pgtype/ext/gofrs-uuid"
+)
 
 type Reservation struct {
-	ReservationID uint `gorm:"primaryKey" json:"id,omitempty"`
-	UserID        int		`gorm:"foreignKey:UserID" json:"user_id"`
-	VehicleID     int       `gorm:"foreignKey:VehicleID" json:"vehicle_id"`
+	ReservationID uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()" json:"id,omitempty"`
+	UserID        string    `gorm:"foreignKey:UserID;references:UserID" json:"user_id"`
+	VehicleID     string    `gorm:"foreignKey:VehicleID;references:VehicleID" json:"vehicle_id"`
 	Quantity      int       `json:"quantity"`
 	StartDate     time.Time `json:"start_date"`
 	ReturnDate    time.Time `json:"return_date"`

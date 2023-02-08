@@ -23,6 +23,18 @@ func (r *repository) FindAll() (*model.Reservations, error) {
 	return &reservation, nil
 }
 
+func (r *repository) FindByUserID(id string) (*model.Reservations, error) {
+	var reservation model.Reservations
+	r.db.Preload("VehicleID").Preload("UserID")
+	data := r.db.Where("is_booked = false").Find(&reservation)
+	if data.Error != nil {
+		return nil, data.Error
+	}
+
+	return &reservation, nil
+}
+
+
 func (r *repository) History() (*model.Reservations, error) {
 	var reservation model.Reservations
 	data := r.db.Where("is_booked = true").Find(&reservation)

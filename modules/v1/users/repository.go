@@ -23,6 +23,19 @@ func (r *repository) FindAll() (*model.Users, error) {
 		return nil, data.Error
 	}
 
+	fmt.Println(user)
+
+	return &user, nil
+}
+
+func (r *repository) FindByUsername(username string) (*model.User, error) {
+	var user model.User
+	result := r.db.First(&user, "name = ?", username)
+
+	if result.Error != nil {
+		return nil, errors.New("user not found")
+	}
+
 	return &user, nil
 }
 
