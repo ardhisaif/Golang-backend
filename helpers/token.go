@@ -6,18 +6,17 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	uuid "github.com/jackc/pgtype/ext/gofrs-uuid"
 )
 
 var secret = os.Getenv("JWT_KEYS")
 
 type claims struct {
-	UserId uuid.UUID
+	UserId string
 	Role   string
 	jwt.RegisteredClaims
 }
 
-func NewToken(userId uuid.UUID, role string) *claims {
+func NewToken(userId string, role string) *claims {
 	times := time.Now().Add(time.Minute * 2).Unix()
 	return &claims{
 		UserId: userId,

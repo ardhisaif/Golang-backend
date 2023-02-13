@@ -6,15 +6,16 @@ import (
 
 	"github.com/ardhisaif/golang_backend/database/orm/model"
 	"github.com/ardhisaif/golang_backend/helpers"
+	"github.com/ardhisaif/golang_backend/interfaces"
 	"github.com/gorilla/mux"
 )
 
 type controller struct {
-	service *service
+	service interfaces.ReservationSvcIF
 }
 
-func NewCtrl(repo *service) *controller {
-	return &controller{repo}
+func NewCtrl(service interfaces.ReservationSvcIF) *controller {
+	return &controller{service}
 }
 
 func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +52,7 @@ func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	var data model.Reservation
 	err := json.NewDecoder(r.Body).Decode(&data) // implement req json
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		helpers.New(http.StatusBadRequest, err.Error()).Send(w)
 		return
 	}
 

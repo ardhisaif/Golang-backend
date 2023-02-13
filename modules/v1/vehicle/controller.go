@@ -77,7 +77,7 @@ func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	data.Image = fileUrl
 	c.service.Create(&data).Send(w)
 }
-
+ 
 func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 

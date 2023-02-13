@@ -7,7 +7,6 @@ import (
 	"github.com/ardhisaif/golang_backend/database/orm/model"
 	"github.com/ardhisaif/golang_backend/helpers"
 	"github.com/ardhisaif/golang_backend/interfaces"
-	uuid "github.com/jackc/pgtype/ext/gofrs-uuid"
 )
 
 type service struct {
@@ -15,11 +14,11 @@ type service struct {
 }
 
 type tokenData struct {
-	Token string `json:"token"`
-	UserID uuid.UUID `json:"id"`
-	Name string `json:"name"`
-	Email string `json:"email"`
-	Role string `json:"role"`
+	Token  string `json:"token"`
+	UserID string `json:"id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
 }
 
 func NewService(repo interfaces.UserRepoIF) *service {

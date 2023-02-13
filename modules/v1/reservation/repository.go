@@ -3,6 +3,7 @@ package reservation
 import (
 	"github.com/ardhisaif/golang_backend/database/orm/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type repository struct {
@@ -15,7 +16,7 @@ func NewRepo(db *gorm.DB) *repository {
 
 func (r *repository) FindAll() (*model.Reservations, error) {
 	var reservation model.Reservations
-	data := r.db.Where("is_booked = false").Find(&reservation)
+	data := r.db.Where("is_booked = false").Preload("User").Preload("Vehicle").Preload(clause.Associations).Find(&reservation)
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -34,6 +35,15 @@ func (r *repository) FindByUserID(id string) (*model.Reservations, error) {
 	return &reservation, nil
 }
 
+func (r *repository) FindByID(id string) (*model.Reservation, error) {
+	var reservation model.Reservation
+	data := r.db.Where("reservation_id = ?", id).Preload("Vehicle").Preload(clause.Associations).First(&reservation)
+	if data.Error != nil {
+		return nil, data.Error
+	}
+
+	return &reservation, nil
+}
 
 func (r *repository) History() (*model.Reservations, error) {
 	var reservation model.Reservations
@@ -58,7 +68,7 @@ func (r *repository) Search(name string) (*model.Reservations, error) {
 func (r *repository) Sort(name string) (*model.Reservations, error) {
 	var reservation model.Reservations
 	data := r.db.Where("is_booked = true").Order(name).Find(&reservation)
-	
+
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -67,6 +77,9 @@ func (r *repository) Sort(name string) (*model.Reservations, error) {
 }
 
 func (r *repository) Create(reservation *model.Reservation) (*model.Reservation, error) {
+	var user model.User
+	r.db.Where("user_id = ?", reservation.UserID).Find(&user)
+
 	data := r.db.Create(&reservation)
 	if data.Error != nil {
 		return nil, data.Error
@@ -85,21 +98,25 @@ func (r *repository) Update(reservation *model.Reservation, id string) (*model.R
 }
 
 func (r *repository) Pay(reservation *model.Reservation, vehicle *model.Vehicle, id string) (*model.Reservation, error) {
-	err := r.db.Where("reservation_id = ?", id).First(&reservation).Error
-	if err != nil {
+	tx := r.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	vehicle.Point = 7
+	if err := tx.Model(&vehicle).Where("vehicle_id = ?", reservation.VehicleID).Updates(&vehicle).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+
 	reservation.IsBooked = true
-	r.db.Save(&reservation)
-
-	err = r.db.Where("vehicle_id = ?", reservation.VehicleID).First(&vehicle).Error
-	if err != nil {
+	if err := tx.Model(&reservation).Where("reservation_id = ?", id).Updates(&reservation).Error; err != nil {
 		return nil, err
 	}
-
-	vehicle.Point = vehicle.Point + 1
-	r.db.Save(vehicle)
-
+	tx.Commit()
 	return reservation, nil
 }
 

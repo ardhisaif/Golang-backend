@@ -2,40 +2,39 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 type Response struct {
-	Meta Meta `json:"meta"`
-	Data       
-}
-
-type Meta struct {
+	Code int `json:"code"`
 	Status  string      `json:"status"`
-	IsError bool        `json:"isError"`
 	Message interface{} `json:"description,omitempty"`
-}
-
-type Data struct {
-	Data interface{} `json:"data,omitempty"`
+	Data interface{} `json:"data,omitempty"`     
 }
 
 func (res Response) Send(w http.ResponseWriter) {
+	w.WriteHeader(res.Code)
 	err := json.NewEncoder(w).Encode(res)
 	if err != nil {
+		fmt.Println(err.Error())
 		w.Write([]byte("Error When Encode Response"))
 	}
 }
 
 func New(code int, message interface{}, data ...interface{}) *Response {
-	return &Response{
-		Meta{
+	if code > 300 {
+		return &Response{
+			Code: code,
 			Status:  getStatus(code),
 			Message: message,
-		},
-		Data{
-			Data: data,
-		},
+		}
+	}
+	return &Response{
+		Code: code,
+		Status:  getStatus(code),
+		Message: message,
+		Data: data[0],
 	}
 }
 
