@@ -9,6 +9,7 @@ type VehicleRepoIF interface {
 	FindAll() (*model.Vehicles, error)
 	Popular() (*model.Vehicles, error)
 	Search(name string) (*model.Vehicles, error)
+	FindByType(name string) (*model.Vehicles, error)
 	Sort(name string) (*model.Vehicles, error)
 	Create(user *model.Vehicle) (*model.Vehicle, error)
 	Update(user *model.Vehicle, id string) (*model.Vehicle, error)
@@ -19,6 +20,7 @@ type VehicleSvcIF interface {
 	FindAll() *helpers.Response
 	Popular() *helpers.Response
 	Search(name string) *helpers.Response
+	FindByType(name string) *helpers.Response
 	Sort(name string) *helpers.Response
 	Create(data *model.Vehicle) *helpers.Response
 	Update(data *model.Vehicle, id string) *helpers.Response

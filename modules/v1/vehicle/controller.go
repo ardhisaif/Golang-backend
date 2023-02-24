@@ -38,6 +38,13 @@ func (c *controller) Search(w http.ResponseWriter, r *http.Request) {
 	c.service.Search(name).Send(w)
 }
 
+func (c *controller) FindByType(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json") // set header to json
+
+	name := r.FormValue("name")
+	c.service.FindByType(name).Send(w)
+}
+
 func (c *controller) Sort(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
@@ -77,7 +84,7 @@ func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	data.Image = fileUrl
 	c.service.Create(&data).Send(w)
 }
- 
+
 func (c *controller) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 

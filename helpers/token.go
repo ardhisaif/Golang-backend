@@ -17,7 +17,7 @@ type claims struct {
 }
 
 func NewToken(userId string, role string) *claims {
-	times := time.Now().Add(time.Minute * 2).Unix()
+	times := time.Now().Add(time.Minute * 10).Unix()
 	return &claims{
 		UserId: userId,
 		Role:   role,

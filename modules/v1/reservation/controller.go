@@ -25,6 +25,14 @@ func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	response.Send(w)
 }
 
+func (c *controller) GetByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json") // set header to json
+
+	id := mux.Vars(r)["id"]
+	response := c.service.GetByID(id)
+	response.Send(w)
+}
+
 func (c *controller) History(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 

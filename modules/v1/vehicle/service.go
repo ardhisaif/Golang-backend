@@ -43,6 +43,15 @@ func (c *service) Search(name string) *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response)
 }
 
+func (c *service) FindByType(name string) *helpers.Response {
+	response, err := c.repo.FindByType(name)
+	if err != nil {
+		return helpers.New(http.StatusBadRequest, err.Error())
+	}
+
+	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response)
+}
+
 func (c *service) Sort(name string) *helpers.Response {
 	response, err := c.repo.Sort(name)
 	if err != nil {

@@ -20,6 +20,7 @@ type ReservationRepoIF interface {
 
 type ReservationSvcIF interface {
 	GetAll() *helpers.Response
+	GetByID(id string) *helpers.Response 
 	History() *helpers.Response
 	Search(name string) *helpers.Response
 	Sort(name string) *helpers.Response

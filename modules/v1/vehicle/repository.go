@@ -25,7 +25,7 @@ func (r *repository) FindAll() (*model.Vehicles, error) {
 
 func (r *repository) Popular() (*model.Vehicles, error) {
 	var vehicles model.Vehicles
-	data := r.db.Order("point desc").Limit(3).Find(&vehicles)
+	data := r.db.Order("point desc").Limit(4).Find(&vehicles)
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -35,7 +35,17 @@ func (r *repository) Popular() (*model.Vehicles, error) {
 
 func (r *repository) Search(name string) (*model.Vehicles, error) {
 	var vehicles model.Vehicles
-	data := r.db.Where("name like ?", "%"+name+"%").Limit(3).Find(&vehicles)
+	data := r.db.Where("name like ?", "%"+name+"%").Limit(4).Find(&vehicles)
+	if data.Error != nil {
+		return nil, data.Error
+	}
+
+	return &vehicles, nil
+}
+
+func (r *repository) FindByType(name string) (*model.Vehicles, error) {
+	var vehicles model.Vehicles
+	data := r.db.Where("type = ?", name).Limit(4).Find(&vehicles)
 	if data.Error != nil {
 		return nil, data.Error
 	}

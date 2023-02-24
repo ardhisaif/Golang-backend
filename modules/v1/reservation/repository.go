@@ -37,7 +37,8 @@ func (r *repository) FindByUserID(id string) (*model.Reservations, error) {
 
 func (r *repository) FindByID(id string) (*model.Reservation, error) {
 	var reservation model.Reservation
-	data := r.db.Where("reservation_id = ?", id).Preload("Vehicle").Preload(clause.Associations).First(&reservation)
+	data := r.db.Where("reservation_id = ?", id).Preload(clause.Associations).First(&reservation)
+	reservation.User.Password = ""
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -78,12 +79,17 @@ func (r *repository) Sort(name string) (*model.Reservations, error) {
 
 func (r *repository) Create(reservation *model.Reservation) (*model.Reservation, error) {
 	var user model.User
+	var vehicle model.Vehicle
 	r.db.Where("user_id = ?", reservation.UserID).Find(&user)
+	r.db.Where("vehicle_id = ?", reservation.VehicleID).Find(&vehicle)
+	reservation.TotalPayment = reservation.Quantity * int(vehicle.Price)
 
 	data := r.db.Create(&reservation)
-	if data.Error != nil {
+	if data.Error != nil { 
 		return nil, data.Error
 	}
+	r.db.Where("reservation_id = ?", reservation.ReservationID).Preload(clause.Associations).First(&reservation)
+	reservation.User.Password = ""
 
 	return reservation, nil
 }
@@ -106,7 +112,7 @@ func (r *repository) Pay(reservation *model.Reservation, vehicle *model.Vehicle,
 		}
 	}()
 
-	vehicle.Point = 7
+	vehicle.Point = reservation.Vehicle.Point + 1
 	if err := tx.Model(&vehicle).Where("vehicle_id = ?", reservation.VehicleID).Updates(&vehicle).Error; err != nil {
 		tx.Rollback()
 		return nil, err
