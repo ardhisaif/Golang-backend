@@ -7,6 +7,7 @@ import (
 
 type VehicleRepoIF interface {
 	FindAll() (*model.Vehicles, error)
+	FindByID(id string) (*model.Vehicle, error)
 	Popular() (*model.Vehicles, error)
 	Search(name string) (*model.Vehicles, error)
 	FindByType(name string) (*model.Vehicles, error)
@@ -18,6 +19,7 @@ type VehicleRepoIF interface {
 
 type VehicleSvcIF interface {
 	FindAll() *helpers.Response
+	FindByID(id string) *helpers.Response 
 	Popular() *helpers.Response
 	Search(name string) *helpers.Response
 	FindByType(name string) *helpers.Response

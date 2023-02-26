@@ -28,5 +28,6 @@ func New(rt *mux.Router, db *gorm.DB) {
 	router.HandleFunc("/sort", ctrl.Sort).Queries("name", "{name}").Methods("GET")
 	router.HandleFunc("/", ctrl.Create).Methods("POST")
 	router.HandleFunc("/{id}", ctrl.Update).Methods("PUT")
+	router.HandleFunc("/{id}", ctrl.GetByID).Methods("GET")
 	// router.HandleFunc("/{id}", ctrl.Delete).Methods("DELETE")
 }

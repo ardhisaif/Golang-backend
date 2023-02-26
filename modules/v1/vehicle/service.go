@@ -25,6 +25,15 @@ func (c *service) FindAll() *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response)
 }
 
+func (c *service) FindByID(id string) *helpers.Response {
+	response, err := c.repo.FindByID(id)
+	if err != nil {
+		return helpers.New(http.StatusBadRequest, err.Error())
+	}
+
+	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", response)
+}
+
 func (c *service) Popular() *helpers.Response {
 	response, err := c.repo.Popular()
 	if err != nil {

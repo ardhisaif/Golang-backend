@@ -23,6 +23,16 @@ func (r *repository) FindAll() (*model.Vehicles, error) {
 	return &vehicles, nil
 }
 
+func (r *repository) FindByID(id string) (*model.Vehicle, error) {
+	var vehicle model.Vehicle
+	data := r.db.Model(&vehicle).Where("vehicle_id = ?", id).Find(&vehicle)
+	if data.Error != nil {
+		return nil, data.Error
+	}
+
+	return &vehicle, nil
+}
+
 func (r *repository) Popular() (*model.Vehicles, error) {
 	var vehicles model.Vehicles
 	data := r.db.Order("point desc").Limit(4).Find(&vehicles)

@@ -25,6 +25,13 @@ func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	c.service.FindAll().Send(w)
 }
 
+func (c *controller) GetByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json") // set header to json
+
+	id := mux.Vars(r)["id"]
+	c.service.FindByID(id).Send(w)
+}
+
 func (c *controller) Popular(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json") // set header to json
 
