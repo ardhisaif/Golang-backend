@@ -1,6 +1,7 @@
 package reservation
 
 import (
+
 	"github.com/ardhisaif/golang_backend/database/orm/model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -14,9 +15,12 @@ func NewRepo(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
-func (r *repository) FindAll() (*model.Reservations, error) {
+func (r *repository) FindAll(userID string) (*model.Reservations, error) {
 	var reservation model.Reservations
-	data := r.db.Where("is_booked = false").Preload("User").Preload("Vehicle").Preload(clause.Associations).Find(&reservation)
+	data := r.db.Where("user_id = ?", userID).Where("is_booked = false").Preload(clause.Associations).Find(&reservation)
+	for i := 0; i < len(reservation); i++ {
+		reservation[i].User.Password = ""
+	}
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -24,10 +28,13 @@ func (r *repository) FindAll() (*model.Reservations, error) {
 	return &reservation, nil
 }
 
-func (r *repository) FindByUserID(id string) (*model.Reservations, error) {
+func (r *repository) FindByUserID(id string, userID string) (*model.Reservations, error) {
 	var reservation model.Reservations
 	r.db.Preload("VehicleID").Preload("UserID")
-	data := r.db.Where("is_booked = false").Find(&reservation)
+	data := r.db.Where("user_id = ?", userID).Where("is_booked = false").Find(&reservation)
+	for i := 0; i < len(reservation); i++ {
+		reservation[i].User.Password = ""
+	}
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -35,9 +42,9 @@ func (r *repository) FindByUserID(id string) (*model.Reservations, error) {
 	return &reservation, nil
 }
 
-func (r *repository) FindByID(id string) (*model.Reservation, error) {
+func (r *repository) FindByID(id string, userID string) (*model.Reservation, error) {
 	var reservation model.Reservation
-	data := r.db.Where("reservation_id = ?", id).Preload(clause.Associations).First(&reservation)
+	data := r.db.Where("user_id = ?", userID).Where("reservation_id = ?", id).Preload(clause.Associations).First(&reservation)
 	reservation.User.Password = ""
 	if data.Error != nil {
 		return nil, data.Error
@@ -46,9 +53,12 @@ func (r *repository) FindByID(id string) (*model.Reservation, error) {
 	return &reservation, nil
 }
 
-func (r *repository) History() (*model.Reservations, error) {
+func (r *repository) History(userID string) (*model.Reservations, error) {
 	var reservation model.Reservations
-	data := r.db.Where("is_booked = true").Find(&reservation)
+	data := r.db.Where("user_id = ?", userID).Where("is_booked = true").Find(&reservation)
+	for i := 0; i < len(reservation); i++ {
+		reservation[i].User.Password = ""
+	}
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -56,9 +66,12 @@ func (r *repository) History() (*model.Reservations, error) {
 	return &reservation, nil
 }
 
-func (r *repository) Search(name string) (*model.Reservations, error) {
+func (r *repository) Search(name string, userID string) (*model.Reservations, error) {
 	var reservation model.Reservations
-	data := r.db.Where("vehicle.name like ?", "%"+name+"%").Limit(3).Find(&reservation)
+	data := r.db.Where("user_id = ?", userID).Where("vehicle.name like ?", "%"+name+"%").Limit(3).Find(&reservation)
+	for i := 0; i < len(reservation); i++ {
+		reservation[i].User.Password = ""
+	}
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -66,10 +79,12 @@ func (r *repository) Search(name string) (*model.Reservations, error) {
 	return &reservation, nil
 }
 
-func (r *repository) Sort(name string) (*model.Reservations, error) {
+func (r *repository) Sort(name string, userID string) (*model.Reservations, error) {
 	var reservation model.Reservations
-	data := r.db.Where("is_booked = true").Order(name).Find(&reservation)
-
+	data := r.db.Where("user_id = ?", userID).Where("is_booked = true").Order(name).Find(&reservation)
+	for i := 0; i < len(reservation); i++ {
+		reservation[i].User.Password = ""
+	}
 	if data.Error != nil {
 		return nil, data.Error
 	}
@@ -122,7 +137,7 @@ func (r *repository) Pay(reservation *model.Reservation, vehicle *model.Vehicle,
 	if err := tx.Model(&reservation).Where("reservation_id = ?", id).Updates(&reservation).Error; err != nil {
 		return nil, err
 	}
-	tx.Commit()
+	
 	return reservation, nil
 }
 

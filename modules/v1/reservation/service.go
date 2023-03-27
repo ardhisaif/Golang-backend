@@ -16,8 +16,8 @@ func NewService(repo interfaces.ReservationRepoIF) *service {
 	return &service{repo}
 }
 
-func (r *service) GetAll() *helpers.Response {
-	data, err := r.repo.FindAll()
+func (r *service) GetAll(userID string) *helpers.Response {
+	data, err := r.repo.FindAll(userID)
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 	}
@@ -25,8 +25,8 @@ func (r *service) GetAll() *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
 }
 
-func (r *service) GetByID(id string) *helpers.Response {
-	data, err := r.repo.FindByID(id)
+func (r *service) GetByID(id string, userID string) *helpers.Response {
+	data, err := r.repo.FindByID(id, userID)
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 	}
@@ -34,18 +34,8 @@ func (r *service) GetByID(id string) *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
 }
 
-func (r *service) History() *helpers.Response {
-	data, err := r.repo.History()
-	if err != nil {
-		return helpers.New(http.StatusBadRequest, err.Error())
-
-	}
-
-	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
-}
-
-func (r *service) Search(name string) *helpers.Response {
-	data, err := r.repo.Search(name)
+func (r *service) History(userID string) *helpers.Response {
+	data, err := r.repo.History(userID )
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 
@@ -54,8 +44,8 @@ func (r *service) Search(name string) *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
 }
 
-func (r *service) Sort(name string) *helpers.Response {
-	data, err := r.repo.Sort(name)
+func (r *service) Search(name string, userID string) *helpers.Response {
+	data, err := r.repo.Search(name, userID )
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 
@@ -64,7 +54,18 @@ func (r *service) Sort(name string) *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
 }
 
-func (r *service) Create(data *model.Reservation) *helpers.Response {
+func (r *service) Sort(name string, userID string) *helpers.Response {
+	data, err := r.repo.Sort(name, userID)
+	if err != nil {
+		return helpers.New(http.StatusBadRequest, err.Error())
+
+	}
+
+	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
+}
+
+func (r *service) Create(data *model.Reservation, userID string ) *helpers.Response {
+	data.UserID = userID
 	data, err := r.repo.Create(data)
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
@@ -73,7 +74,8 @@ func (r *service) Create(data *model.Reservation) *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
 }
 
-func (r *service) Update(data *model.Reservation, id string) *helpers.Response {
+func (r *service) Update(data *model.Reservation, id string, userID string) *helpers.Response {
+	data.UserID = userID
 	data, err := r.repo.Update(data, id)
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
@@ -83,13 +85,13 @@ func (r *service) Update(data *model.Reservation, id string) *helpers.Response {
 	return helpers.New(http.StatusOK, "Data successfully retrieved/transmitted!", data)
 }
 
-func (r *service) Pay(reservation *model.Reservation, vehicle *model.Vehicle, id string) *helpers.Response {
-	data, err := r.repo.FindByID(id)
+func (r *service) Pay(reservation *model.Reservation, vehicle *model.Vehicle, id string, userID string) *helpers.Response {
+	data, err := r.repo.FindByID(id, userID)
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 	}
 
-	_, err = r.repo.Pay(data, vehicle, id)
+	_, err = r.repo.Pay(data, vehicle, id )
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 
@@ -98,11 +100,11 @@ func (r *service) Pay(reservation *model.Reservation, vehicle *model.Vehicle, id
 }
 
 func (r *service) Delete(data *model.Reservation, id string) *helpers.Response {
-	_, err := r.repo.Delete(data, id)
+	_, err := r.repo.Delete(data, id )
 	if err != nil {
 		return helpers.New(http.StatusBadRequest, err.Error())
 
 	}
 
-	return helpers.New(http.StatusOK, "Payment success")
+	return helpers.New(http.StatusOK, "Delete success")
 }
